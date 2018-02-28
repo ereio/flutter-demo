@@ -50,23 +50,14 @@ class _MyHomePageState extends State<MyHomePage> {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text(widget.title),
-      ),
-
+      ), 
       body: new Center(
-        child: new Column(
-          children: <Widget>[
-            new Text(
-              'You have pushed the button this many times:',
-            ),
-            new Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
-            new Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
-          ],
+        child:  new ListView.builder(
+          padding: new EdgeInsets.all(8.0),
+          itemExtent: 20.0,
+          itemBuilder: (BuildContext context, int index) {
+            return new Text('entry $index');
+          },
         ),
       ),
       floatingActionButton: new FloatingActionButton(
