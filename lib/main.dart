@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './model/Movie.dart';
 
 void main() => runApp(new MyApp());
 
@@ -27,22 +28,30 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  List<Movie> _movieList = new List<Movie>();
 
   void _incrementCounter() {
     setState(() {
       _counter++;
     });
   }
+  void _loadMovies(){
+    List<Movie> fetchedMovieList = new List<Movie>();
+    fetchedMovieList.add(new Movie("The Revenant", "A frontiersman on a fur trading expedition in the 1820s fights for survival after being mauled by a bear and left for dead by members of his own hunting team. "));
+    setState(() {
+      _movieList = fetchedMovieList;
+    });
+  }
 
   @override
-  Widget generateMovieCard(){
+  Widget buildMovieCard(Movie movie){
     return new Card(
         child: new Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             const ListTile(
               leading: const Icon(Icons.album),
-              title: const Text('The Enchanted Nightingale'),
+              title: const Text(movie.title),
               subtitle: const Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
             ),
             new ButtonTheme.bar( // make buttons use the appropriate styles for cards
@@ -85,7 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
           padding: new EdgeInsets.all(8.0),
           itemExtent: 132.0,
           itemBuilder: (BuildContext context, int index) {
-            return generateMovieCard();
+            return buildMovieCard(const movie[index]);
           },
         ),
       ),
