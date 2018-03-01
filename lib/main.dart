@@ -3,6 +3,7 @@ import './model/Movie.dart';
 
 void main() => runApp(new MyApp());
 
+const String appName = "Hack FSU Flutter Demo";
 
 class Choice {
   const Choice({ this.title, this.icon });
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: 'Hack FSU Demo',
+      title: appName,
       theme: new ThemeData(
         primarySwatch: Colors.teal,
       ),
@@ -29,8 +30,8 @@ class MyApp extends StatelessWidget {
         length: choices.length,
         child: new Scaffold(
           appBar: new AppBar(
-            bottom: new TabBar(
-              isScrollable: true,
+            title: const Text(appName),
+            bottom: new TabBar( 
               tabs: choices.map((Choice choice) {
                 return new Tab(
                   text: choice.title,
@@ -42,7 +43,7 @@ class MyApp extends StatelessWidget {
           body: new TabBarView(
             children: choices.map((Choice choice) {
               return new Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(2.0),
                 child: new MyHomePage()
               );
             }).toList(),
@@ -79,7 +80,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  @override
   Widget buildMovieCard(Movie movie){
     return new Card(
         child: new Column(
