@@ -3,6 +3,19 @@ import './model/Movie.dart';
 
 void main() => runApp(new MyApp());
 
+
+class Choice {
+  const Choice({ this.title, this.icon });
+  final String title;
+  final IconData icon;
+}
+
+const List<Choice> choices = const <Choice>[
+  const Choice(title: 'SEARCH', icon: Icons.search),
+  const Choice(title: 'SAVED', icon: Icons.save),
+  const Choice(title: 'WATCHED', icon: Icons.airplay),
+];
+
 class MyApp extends StatelessWidget {
   // This widget is the movie of your application.
   @override
@@ -12,11 +25,35 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(
         primarySwatch: Colors.teal,
       ),
-      home: new MyHomePage(title: 'Hack FSU Flutter Demo'),
+      home: new DefaultTabController(
+        length: choices.length,
+        child: new Scaffold(
+          appBar: new AppBar(
+            bottom: new TabBar(
+              isScrollable: true,
+              tabs: choices.map((Choice choice) {
+                return new Tab(
+                  text: choice.title,
+                  icon: new Icon(choice.icon),
+                );
+              }).toList(),
+            ),
+          ),
+          body: new TabBarView(
+            children: choices.map((Choice choice) {
+              return new Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: new MyHomePage()
+              );
+            }).toList(),
+          ),
+        ),
+      ),
     );
   }
 }
 
+// home: new MyHomePage(title: 'Hack FSU Flutter Demo'),
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 
@@ -24,23 +61,6 @@ class MyHomePage extends StatefulWidget {
 
   @override
   _MyHomePageState createState() => new _MyHomePageState();
-}
-
-
-class MovieItem extends StatelessWidget {
-  const MovieItem(this.movie);
-
-  final Movie movie;
-
-  Widget _buildTiles(Movie movie) {
-    if (movie.title.isNotEmpty)
-      return new ListTile(title: new Text(movie.title));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _buildTiles(movie);
-  }
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -88,23 +108,11 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       );
   }
-  // Column is also layout widget. It takes a list of children and
-  // arranges them vertically. By default, it sizes itself to fit its
-  // children horizontally, and tries to be as tall as its parent.
-
-  // Column has various properties to control how it sizes itself and
-  // how it positions its children. Here we use mainAxisAlignment to
-  // center the children vertically; the main axis here is the vertical
-  // axis because Columns are vertical (the cross axis would be
-  // horizontal).
 
   @override
   Widget build(BuildContext context) {
 
     return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(widget.title),
-      ),
       body: new Center(
         child:  new ListView(
             children: _movieList.map((movie) => buildMovieCard(movie)).toList()
