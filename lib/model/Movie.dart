@@ -1,6 +1,5 @@
-  import 'package:flutter/material.dart';
 
-  class Movie {
+class Movie {
     String title;
     String author;
     String director;

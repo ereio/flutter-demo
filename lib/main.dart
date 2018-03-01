@@ -4,7 +4,7 @@ import './model/Movie.dart';
 void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  // This widget is the movie of your application.
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
@@ -26,20 +26,36 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => new _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  List<Movie> _movieList = new List<Movie>();
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+class MovieItem extends StatelessWidget {
+  const MovieItem(this.movie);
+
+  final Movie movie;
+
+  Widget _buildTiles(Movie movie) {
+    if (movie.title.isNotEmpty)
+      return new ListTile(title: new Text(movie.title));
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return _buildTiles(movie);
+  }
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  List<Movie> _movieList;
+
+  @override
+  initState(){
+      super.initState();
+      _movieList = new List.generate(10, (i) => new Movie("The $i Movie", "It's about the number $i"));
+  }
+
   void _loadMovies(){
-    List<Movie> fetchedMovieList = new List<Movie>();
-    fetchedMovieList.add(new Movie("The Revenant", "A frontiersman on a fur trading expedition in the 1820s fights for survival after being mauled by a bear and left for dead by members of his own hunting team. "));
+    _movieList.add(new Movie("The Revenant", "A frontiersman on a fur trading expedition in the 1820s fights for survival after being mauled by a bear and left for dead by members of his own hunting team. "));
     setState(() {
-      _movieList = fetchedMovieList;
+      _movieList = _movieList;
     });
   }
 
@@ -49,20 +65,20 @@ class _MyHomePageState extends State<MyHomePage> {
         child: new Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            const ListTile(
-              leading: const Icon(Icons.album),
-              title: const Text(movie.title),
-              subtitle: const Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
+            new ListTile(
+              leading: const Icon(Icons.movie),
+              title: new Text(movie.title),
+              subtitle: new Text(movie.description),
             ),
             new ButtonTheme.bar( // make buttons use the appropriate styles for cards
               child: new ButtonBar(
                 children: <Widget>[
                   new FlatButton(
-                    child: const Text('BUY TICKETS'),
+                    child: const Text('SAVE'),
                     onPressed: () { /* ... */ },
                   ),
                   new FlatButton(
-                    child: const Text('LISTEN'),
+                    child: const Text('WATCHED'),
                     onPressed: () { /* ... */ },
                   ),
                 ],
@@ -90,17 +106,18 @@ class _MyHomePageState extends State<MyHomePage> {
         title: new Text(widget.title),
       ),
       body: new Center(
-        child:  new ListView.builder(
-          padding: new EdgeInsets.all(8.0),
-          itemExtent: 132.0,
-          itemBuilder: (BuildContext context, int index) {
-            return buildMovieCard(const movie[index]);
-          },
+        child:  new ListView(
+            children: _movieList.map((movie) => buildMovieCard(movie)).toList()
+            // padding: new EdgeInsets.all(8.0),
+            // itemExtent: 132.0,
+            // itemBuilder: (BuildContext context, int index) {
+            //   return buildMovieCard(_movieList[index]);
+            // },
         ),
       ),
       floatingActionButton: new FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
+        onPressed: () {_loadMovies();},
+        tooltip: 'Load Movies',
         child: new Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
