@@ -34,6 +34,35 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  @override
+  Widget generateMovieCard(){
+    return new Card(
+        child: new Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const ListTile(
+              leading: const Icon(Icons.album),
+              title: const Text('The Enchanted Nightingale'),
+              subtitle: const Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
+            ),
+            new ButtonTheme.bar( // make buttons use the appropriate styles for cards
+              child: new ButtonBar(
+                children: <Widget>[
+                  new FlatButton(
+                    child: const Text('BUY TICKETS'),
+                    onPressed: () { /* ... */ },
+                  ),
+                  new FlatButton(
+                    child: const Text('LISTEN'),
+                    onPressed: () { /* ... */ },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+  }
   // Column is also layout widget. It takes a list of children and
   // arranges them vertically. By default, it sizes itself to fit its
   // children horizontally, and tries to be as tall as its parent.
@@ -50,13 +79,13 @@ class _MyHomePageState extends State<MyHomePage> {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text(widget.title),
-      ), 
+      ),
       body: new Center(
         child:  new ListView.builder(
           padding: new EdgeInsets.all(8.0),
-          itemExtent: 20.0,
+          itemExtent: 132.0,
           itemBuilder: (BuildContext context, int index) {
-            return new Text('entry $index');
+            return generateMovieCard();
           },
         ),
       ),
