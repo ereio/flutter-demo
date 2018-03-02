@@ -13,10 +13,10 @@ class Movie {
      }
 
      Movie.fromJson(Map<String, String> jsonObj) {
-      this.title = jsonObj['title'];
-      this.author = jsonObj['author'];
-      this.director = jsonObj['director'];
-      this.posterUrl = jsonObj['posterUrl'];
-      this.description = jsonObj['description'];
+      this.title = jsonObj['Title'];
+      this.author = jsonObj['Writer'];
+      this.director = jsonObj['Director'];
+      this.posterUrl = jsonObj['Poster'];
+      this.description = jsonObj['Plot'];
     }
   }

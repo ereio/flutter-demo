@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'dart:convert';
 import './model/Movie.dart';
 
 void main() => runApp(new MyApp());
@@ -102,12 +104,7 @@ class MyAppState extends State<MyApp> {
                 case 'SEARCH':
                   return new Padding(
                     padding: const EdgeInsets.all(2.0),
-                    child: new SearchPage(
-                      toggleWatched: toggleWatched,
-                      toggleSaved: toggleSaved,
-                      isSaved: isSaved,
-                      isWatched: isWatched,
-                    ),
+                    child: _searchPage
                   );
                 case 'SAVED':
                   return new Padding(
@@ -180,6 +177,9 @@ class SearchMovieCard extends StatelessWidget {
             height: 240.0,
             fit: BoxFit.cover,
           ),
+          new Container(
+            padding: const EdgeInsets.fromLTRB(0.0, 16.0, 0.0, 0.0),
+          ),
           new ListTile(
             leading: const Icon(Icons.movie),
             title: new Text(movie.title),
@@ -233,6 +233,10 @@ class SearchPage extends StatefulWidget {
 
 class SearchPageState extends State<SearchPage> {
   List<Movie> _movieList;
+  int index = 0;
+  static const List<String> _movieUrls = const ["http://www.omdbapi.com/?i=tt0020620&apikey=26cd6476&plot=full",
+"http://www.omdbapi.com/?i=tt4574334&apikey=26cd6476&plot=full",
+"http://www.omdbapi.com/?i=tt0020620&apikey=26cd6476&plot=full"];
 
   @override
   initState() {
@@ -243,10 +247,20 @@ class SearchPageState extends State<SearchPage> {
             'http://www.doctormacro.com/Images/Posters/A/Poster%20-%20Abraham%20Lincoln%20(1930)_01.jpg'));
   }
 
-  void _searchMovies() {
-    setState(() {
-      _movieList.clear();
-    });
+   _searchMovies() async {
+      var httpClient = new HttpClient();
+      var request = await httpClient.getUrl(Uri.parse(_movieUrls[index % 3]));
+      var response = await request.close();
+      var responseBody = await response.transform(UTF8.decoder).join();
+
+      Map parsedList = JSON.decode(responseBody);
+
+      if (!mounted) return;
+      setState(() {
+       _movieList.add(new Movie.fromJson(parsedList));
+      });
+
+      index++;
   }
 
   @override
