@@ -18,30 +18,60 @@ const List<Choice> choices = const <Choice>[
 ];
 
 class MyApp extends StatefulWidget {
-
   @override
   MyAppState createState() => new MyAppState();
 }
 
+typedef void MovieVoidCallback(Movie movie);
+typedef bool MovieBoolCallback(Movie movie);
+
 class MyAppState extends State<MyApp> {
   final _saved = new Set<Movie>();
-
   final _watched = new Set<Movie>();
 
+  SearchPage _searchPage;
+
   void toggleSaved(Movie movie) {
-    if(_saved.contains(movie)){
-      setState(() {_saved.remove(movie);});
+    if (_saved.contains(movie)) {
+      setState(() {
+        _saved.remove(movie);
+      });
     } else {
-      setState(() {_saved.add(movie);});
+      setState(() {
+        _saved.add(movie);
+      });
     }
   }
 
   void toggleWatched(Movie movie) {
-    if(_watched.contains(movie)){
-      setState(() {_watched.remove(movie);});
+    if (_watched.contains(movie)) {
+      setState(() {
+        _watched.remove(movie);
+      });
     } else {
-      setState(() {_watched.add(movie);});
+      setState(() {
+        _watched.add(movie);
+      });
     }
+  }
+
+  bool isWatched(Movie movie) {
+    return _watched.contains(movie);
+  }
+
+  bool isSaved(Movie movie) {
+    return _saved.contains(movie);
+  }
+
+  @override
+  initState() {
+    super.initState();
+    _searchPage = new SearchPage(
+      toggleWatched: toggleWatched,
+      toggleSaved: toggleSaved,
+      isSaved: isSaved,
+      isWatched: isWatched,
+    );
   }
 
   // This widget is the movie of your application.
@@ -68,20 +98,25 @@ class MyAppState extends State<MyApp> {
           ),
           body: new TabBarView(
             children: choices.map((Choice choice) {
-              switch(choice.title){
+              switch (choice.title) {
                 case 'SEARCH':
                   return new Padding(
-                      padding: const EdgeInsets.all(2.0),
-                      child: new SearchPage());
+                    padding: const EdgeInsets.all(2.0),
+                    child: new SearchPage(
+                      toggleWatched: toggleWatched,
+                      toggleSaved: toggleSaved,
+                      isSaved: isSaved,
+                      isWatched: isWatched,
+                    ),
+                  );
                 case 'SAVED':
                   return new Padding(
                       padding: const EdgeInsets.all(2.0),
-                      child: new SavedPage(savedMovies: _saved)
-                    );
+                      child: new SavedPage(savedMovies: _saved));
                 case 'WATCHED':
                   return new Padding(
                       padding: const EdgeInsets.all(2.0),
-                      child: new WatchedPage(watchedMovies: _saved));
+                      child: new WatchedPage(watchedMovies: _watched));
               }
             }).toList(),
           ),
@@ -91,25 +126,17 @@ class MyAppState extends State<MyApp> {
   }
 }
 
-class WatchedToggler extends StatelessWidget {
-  WatchedToggler({this.onPressed});
-
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return new RaisedButton(
-      onPressed: onPressed,
-      child: new Text('WATCHED'),
-    );
-  }
-}
-
 Widget buildMovieCard(Movie movie) {
   return new Card(
     child: new Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
+        new Image.network(
+          movie.posterUrl,
+          width: 600.0,
+          height: 240.0,
+          fit: BoxFit.cover,
+        ),
         new ListTile(
           leading: const Icon(Icons.movie),
           title: new Text(movie.title),
@@ -120,39 +147,85 @@ Widget buildMovieCard(Movie movie) {
   );
 }
 
-Widget buildSearchCard(Movie movie, Function onSaved, Function onWatched) {
-  return new Card(
-    child: new Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        new ListTile(
-          leading: const Icon(Icons.movie),
-          title: new Text(movie.title),
-          subtitle: new Text(movie.description),
-        ),
-        new ButtonTheme.bar(
-          // make buttons use the appropriate styles for cards
-          child: new ButtonBar(
-            children: <Widget>[
-              new FlatButton(
-                child: const Text('SAVE'),
-                onPressed: () {/* ... */},
-              ),
-              new FlatButton(
-                child: const Text('WATCHED'),
-                onPressed: () {/* ... */},
-              ),
-            ],
+class SearchMovieCard extends StatelessWidget {
+  SearchMovieCard(
+      {Key key,
+      Movie movie,
+      this.toggleSaved,
+      this.toggleWatched,
+      this.isSaved,
+      this.isWatched})
+      : movie = movie,
+        super(key: key);
+
+  final Movie movie;
+
+  // Result is simply handed off to SearchMovieCard as bool
+  final bool isSaved;
+  final bool isWatched;
+
+  // Passing Objects all the way down in case they need to be modified locally
+  final MovieVoidCallback toggleSaved;
+  final MovieVoidCallback toggleWatched;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Card(
+      child: new Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          new Image.network(
+            movie.posterUrl,
+            width: 600.0,
+            height: 240.0,
+            fit: BoxFit.cover,
           ),
-        ),
-      ],
-    ),
-  );
+          new ListTile(
+            leading: const Icon(Icons.movie),
+            title: new Text(movie.title),
+            subtitle: new Text(movie.description),
+          ),
+          new ButtonTheme.bar(
+            // make buttons use the appropriate styles for cards
+            child: new ButtonBar(
+              children: <Widget>[
+                new FlatButton(
+                  child: isSaved ? const Text('UNSAVE') : const Text('SAVE'),
+                  onPressed: () {
+                    toggleSaved(movie);
+                  },
+                ),
+                new FlatButton(
+                  child: isWatched
+                      ? const Text('UNWATCHED')
+                      : const Text('WATCHED'),
+                  onPressed: () {
+                    toggleWatched(movie);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // home: new MyHomePage(title: 'Hack FSU Flutter Demo'),
 class SearchPage extends StatefulWidget {
-  SearchPage({Key key}) : super(key: key);
+  SearchPage(
+      {Key key,
+      this.isSaved,
+      this.isWatched,
+      this.toggleWatched,
+      this.toggleSaved})
+      : super(key: key);
+
+  final MovieBoolCallback isSaved;
+  final MovieBoolCallback isWatched;
+  final MovieVoidCallback toggleSaved;
+  final MovieVoidCallback toggleWatched;
 
   @override
   SearchPageState createState() => new SearchPageState();
@@ -165,14 +238,14 @@ class SearchPageState extends State<SearchPage> {
   initState() {
     super.initState();
     _movieList = new List.generate(
-        10, (i) => new Movie("The $i Movie", "It's about the number $i"));
+        10,
+        (i) => new Movie("The $i Movie", "It's about the number $i",
+            'http://www.doctormacro.com/Images/Posters/A/Poster%20-%20Abraham%20Lincoln%20(1930)_01.jpg'));
   }
 
   void _searchMovies() {
     setState(() {
       _movieList.clear();
-      _movieList.add(new Movie("The Revenant",
-          "A frontiersman on a fur trading expedition in the 1820s fights for survival after being mauled by a bear and left for dead by members of his own hunting team. ")); 
     });
   }
 
@@ -181,13 +254,15 @@ class SearchPageState extends State<SearchPage> {
     return new Scaffold(
       body: new Center(
         child: new ListView(
-            children: _movieList.map((movie) => buildMovieCard(movie)).toList()
-            // padding: new EdgeInsets.all(8.0),
-            // itemExtent: 132.0,
-            // itemBuilder: (BuildContext context, int index) {
-            //   return buildMovieCard(_movieList[index]);
-            // },
-            ),
+            children: _movieList
+                .map((movie) => new SearchMovieCard(
+                      movie: movie,
+                      isSaved: widget.isSaved(movie),
+                      isWatched: widget.isWatched(movie),
+                      toggleSaved: widget.toggleSaved,
+                      toggleWatched: widget.toggleWatched,
+                    ))
+                .toList()),
       ),
       floatingActionButton: new FloatingActionButton(
         onPressed: () {
@@ -211,13 +286,8 @@ class SavedPage extends StatelessWidget {
     return new Scaffold(
       body: new Center(
         child: new ListView(
-            children: savedMovies.map((movie) => buildMovieCard(movie)).toList()
-            // padding: new EdgeInsets.all(8.0),
-            // itemExtent: 132.0,
-            // itemBuilder: (BuildContext context, int index) {
-            //   return buildMovieCard(_movieList[index]);
-            // },
-            ),
+            children:
+                savedMovies.map((movie) => buildMovieCard(movie)).toList()),
       ),
     );
   }
@@ -234,13 +304,8 @@ class WatchedPage extends StatelessWidget {
     return new Scaffold(
       body: new Center(
         child: new ListView(
-            children: watchedMovies.map((movie) => buildMovieCard(movie)).toList()
-            // padding: new EdgeInsets.all(8.0),
-            // itemExtent: 132.0,
-            // itemBuilder: (BuildContext context, int index) {
-            //   return buildMovieCard(_movieList[index]);
-            // },
-            ),
+            children:
+                watchedMovies.map((movie) => buildMovieCard(movie)).toList()),
       ),
     );
   }

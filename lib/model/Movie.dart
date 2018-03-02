@@ -6,9 +6,10 @@ class Movie {
     String posterUrl;
     String description;
 
-     Movie(String title, String description) {
+     Movie(String title, String description, String posterUrl) {
        this.title = title;
        this.description = description;
+       this.posterUrl = posterUrl;
      }
 
      Movie.fromJson(Map<String, String> jsonObj) {
