@@ -31,10 +31,8 @@ class MyAppState extends State<MyApp> {
   final _saved = new Set<Movie>();
   final _watched = new Set<Movie>();
 
-  SearchPage _searchPage;
-
   void toggleSaved(Movie movie) {
-    if (_saved.contains(movie)) {
+    if (isSaved(movie)) {
       setState(() {
         _saved.remove(movie);
       });
@@ -46,7 +44,7 @@ class MyAppState extends State<MyApp> {
   }
 
   void toggleWatched(Movie movie) {
-    if (_watched.contains(movie)) {
+    if (isWatched(movie)) {
       setState(() {
         _watched.remove(movie);
       });
@@ -68,12 +66,6 @@ class MyAppState extends State<MyApp> {
   @override
   initState() {
     super.initState();
-    _searchPage = new SearchPage(
-      toggleWatched: toggleWatched,
-      toggleSaved: toggleSaved,
-      isSaved: isSaved,
-      isWatched: isWatched,
-    );
   }
 
   // This widget is the movie of your application.
@@ -104,7 +96,12 @@ class MyAppState extends State<MyApp> {
                 case 'SEARCH':
                   return new Padding(
                     padding: const EdgeInsets.all(2.0),
-                    child: _searchPage
+                    child: new SearchPage(
+                      toggleWatched: toggleWatched,
+                      toggleSaved: toggleSaved,
+                      isSaved: isSaved,
+                      isWatched: isWatched,
+                    ),
                   );
                 case 'SAVED':
                   return new Padding(
@@ -236,7 +233,7 @@ class SearchPageState extends State<SearchPage> {
   int index = 0;
   static const List<String> _movieUrls = const ["http://www.omdbapi.com/?i=tt0020620&apikey=26cd6476&plot=full",
 "http://www.omdbapi.com/?i=tt4574334&apikey=26cd6476&plot=full",
-"http://www.omdbapi.com/?i=tt0020620&apikey=26cd6476&plot=full"];
+"http://www.omdbapi.com/?i=tt4877122&apikey=26cd6476&plot=full"];
 
   @override
   initState() {
@@ -257,6 +254,7 @@ class SearchPageState extends State<SearchPage> {
 
       if (!mounted) return;
       setState(() {
+        if(index == 0) _movieList.clear();
        _movieList.add(new Movie.fromJson(parsedList));
       });
 
