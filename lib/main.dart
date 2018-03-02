@@ -17,7 +17,33 @@ const List<Choice> choices = const <Choice>[
   const Choice(title: 'WATCHED', icon: Icons.airplay),
 ];
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+
+  @override
+  MyAppState createState() => new MyAppState();
+}
+
+class MyAppState extends State<MyApp> {
+  final _saved = new Set<Movie>();
+
+  final _watched = new Set<Movie>();
+
+  void toggleSaved(Movie movie) {
+    if(_saved.contains(movie)){
+      setState(() {_saved.remove(movie);});
+    } else {
+      setState(() {_saved.add(movie);});
+    }
+  }
+
+  void toggleWatched(Movie movie) {
+    if(_watched.contains(movie)){
+      setState(() {_watched.remove(movie);});
+    } else {
+      setState(() {_watched.add(movie);});
+    }
+  }
+
   // This widget is the movie of your application.
   @override
   Widget build(BuildContext context) {
@@ -50,11 +76,12 @@ class MyApp extends StatelessWidget {
                 case 'SAVED':
                   return new Padding(
                       padding: const EdgeInsets.all(2.0),
-                      child: new SearchPage());
+                      child: new SavedPage(savedMovies: _saved)
+                    );
                 case 'WATCHED':
                   return new Padding(
                       padding: const EdgeInsets.all(2.0),
-                      child: new SearchPage());
+                      child: new WatchedPage(watchedMovies: _saved));
               }
             }).toList(),
           ),
@@ -64,11 +91,68 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class WatchedToggler extends StatelessWidget {
+  WatchedToggler({this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return new RaisedButton(
+      onPressed: onPressed,
+      child: new Text('WATCHED'),
+    );
+  }
+}
+
+Widget buildMovieCard(Movie movie) {
+  return new Card(
+    child: new Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        new ListTile(
+          leading: const Icon(Icons.movie),
+          title: new Text(movie.title),
+          subtitle: new Text(movie.description),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget buildSearchCard(Movie movie, Function onSaved, Function onWatched) {
+  return new Card(
+    child: new Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        new ListTile(
+          leading: const Icon(Icons.movie),
+          title: new Text(movie.title),
+          subtitle: new Text(movie.description),
+        ),
+        new ButtonTheme.bar(
+          // make buttons use the appropriate styles for cards
+          child: new ButtonBar(
+            children: <Widget>[
+              new FlatButton(
+                child: const Text('SAVE'),
+                onPressed: () {/* ... */},
+              ),
+              new FlatButton(
+                child: const Text('WATCHED'),
+                onPressed: () {/* ... */},
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 // home: new MyHomePage(title: 'Hack FSU Flutter Demo'),
 class SearchPage extends StatefulWidget {
-  SearchPage({Key key, this.title}) : super(key: key);
-
-  final String title;
+  SearchPage({Key key}) : super(key: key);
 
   @override
   SearchPageState createState() => new SearchPageState();
@@ -84,42 +168,12 @@ class SearchPageState extends State<SearchPage> {
         10, (i) => new Movie("The $i Movie", "It's about the number $i"));
   }
 
-  void _loadMovies() {
-    _movieList.add(new Movie("The Revenant",
-        "A frontiersman on a fur trading expedition in the 1820s fights for survival after being mauled by a bear and left for dead by members of his own hunting team. "));
+  void _searchMovies() {
     setState(() {
-      _movieList = _movieList;
+      _movieList.clear();
+      _movieList.add(new Movie("The Revenant",
+          "A frontiersman on a fur trading expedition in the 1820s fights for survival after being mauled by a bear and left for dead by members of his own hunting team. ")); 
     });
-  }
-
-  Widget buildMovieCard(Movie movie) {
-    return new Card(
-      child: new Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          new ListTile(
-            leading: const Icon(Icons.movie),
-            title: new Text(movie.title),
-            subtitle: new Text(movie.description),
-          ),
-          new ButtonTheme.bar(
-            // make buttons use the appropriate styles for cards
-            child: new ButtonBar(
-              children: <Widget>[
-                new FlatButton(
-                  child: const Text('SAVE'),
-                  onPressed: () {/* ... */},
-                ),
-                new FlatButton(
-                  child: const Text('WATCHED'),
-                  onPressed: () {/* ... */},
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -137,168 +191,57 @@ class SearchPageState extends State<SearchPage> {
       ),
       floatingActionButton: new FloatingActionButton(
         onPressed: () {
-          _loadMovies();
+          _searchMovies();
         },
-        tooltip: 'Load Movies',
-        child: new Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
-  }
-}
-
-// home: new MyHomePage(title: 'Hack FSU Flutter Demo'),
-class SavedPage extends StatefulWidget {
-  SavedPage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  SavedPageState createState() => new SavedPageState();
-}
-
-class SavedPageState extends State<SearchPage> {
-  List<Movie> _movieList;
-
-  @override
-  initState() {
-    super.initState();
-    _movieList = new List.generate(
-        10, (i) => new Movie("The $i Movie", "It's about the number $i"));
-  }
-
-  void _loadMovies() {
-    _movieList.add(new Movie("The Revenant",
-        "A frontiersman on a fur trading expedition in the 1820s fights for survival after being mauled by a bear and left for dead by members of his own hunting team. "));
-    setState(() {
-      _movieList = _movieList;
-    });
-  }
-
-  Widget buildMovieCard(Movie movie) {
-    return new Card(
-      child: new Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          new ListTile(
-            leading: const Icon(Icons.movie),
-            title: new Text(movie.title),
-            subtitle: new Text(movie.description),
-          ),
-          new ButtonTheme.bar(
-            // make buttons use the appropriate styles for cards
-            child: new ButtonBar(
-              children: <Widget>[
-                new FlatButton(
-                  child: const Text('SAVE'),
-                  onPressed: () {/* ... */},
-                ),
-                new FlatButton(
-                  child: const Text('WATCHED'),
-                  onPressed: () {/* ... */},
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new Scaffold(
-      body: new Center(
-        child: new ListView(
-            children: _movieList.map((movie) => buildMovieCard(movie)).toList()
-            // padding: new EdgeInsets.all(8.0),
-            // itemExtent: 132.0,
-            // itemBuilder: (BuildContext context, int index) {
-            //   return buildMovieCard(_movieList[index]);
-            // },
-            ),
-      ),
-    );
-  }
-}
-
-// home: new MyHomePage(title: 'Hack FSU Flutter Demo'),
-class WatchedPage extends StatefulWidget {
-  WatchedPage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  WatchedPageState createState() => new WatchedPageState();
-}
-
-class WatchedPageState extends State<SearchPage> {
-  List<Movie> _movieList;
-
-  @override
-  initState() {
-    super.initState();
-    _movieList = new List.generate(
-        10, (i) => new Movie("The $i Movie", "It's about the number $i"));
-  }
-
-  void _loadMovies() {
-    _movieList.add(new Movie("The Revenant",
-        "A frontiersman on a fur trading expedition in the 1820s fights for survival after being mauled by a bear and left for dead by members of his own hunting team. "));
-    setState(() {
-      _movieList = _movieList;
-    });
-  }
-
-  Widget buildMovieCard(Movie movie) {
-    return new Card(
-      child: new Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          new ListTile(
-            leading: const Icon(Icons.movie),
-            title: new Text(movie.title),
-            subtitle: new Text(movie.description),
-          ),
-          new ButtonTheme.bar(
-            // make buttons use the appropriate styles for cards
-            child: new ButtonBar(
-              children: <Widget>[
-                new FlatButton(
-                  child: const Text('SAVE'),
-                  onPressed: () {/* ... */},
-                ),
-                new FlatButton(
-                  child: const Text('WATCHED'),
-                  onPressed: () {/* ... */},
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new Scaffold(
-      body: new Center(
-        child: new ListView(
-            children: _movieList.map((movie) => buildMovieCard(movie)).toList()
-            // padding: new EdgeInsets.all(8.0),
-            // itemExtent: 132.0,
-            // itemBuilder: (BuildContext context, int index) {
-            //   return buildMovieCard(_movieList[index]);
-            // },
-            ),
-      ),
-      floatingActionButton: new FloatingActionButton(
-        onPressed: () {
-          _loadMovies();
-        },
-        tooltip: 'Load Movies',
+        tooltip: 'Search Movies',
         child: new Icon(Icons.search),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+// home: new MyHomePage(title: 'Hack FSU Flutter Demo'),
+class SavedPage extends StatelessWidget {
+  SavedPage({this.savedMovies}) : super();
+
+  final Set<Movie> savedMovies;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      body: new Center(
+        child: new ListView(
+            children: savedMovies.map((movie) => buildMovieCard(movie)).toList()
+            // padding: new EdgeInsets.all(8.0),
+            // itemExtent: 132.0,
+            // itemBuilder: (BuildContext context, int index) {
+            //   return buildMovieCard(_movieList[index]);
+            // },
+            ),
+      ),
+    );
+  }
+}
+
+// home: new MyHomePage(title: 'Hack FSU Flutter Demo'),
+class WatchedPage extends StatelessWidget {
+  WatchedPage({this.watchedMovies}) : super();
+
+  final Set<Movie> watchedMovies;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      body: new Center(
+        child: new ListView(
+            children: watchedMovies.map((movie) => buildMovieCard(movie)).toList()
+            // padding: new EdgeInsets.all(8.0),
+            // itemExtent: 132.0,
+            // itemBuilder: (BuildContext context, int index) {
+            //   return buildMovieCard(_movieList[index]);
+            // },
+            ),
+      ),
     );
   }
 }
